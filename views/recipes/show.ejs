@@ -6,18 +6,21 @@
     <title>Recipes</title>
 </head>
 <body>
-    <%- include('./partials/_navbar.ejs') %>
-    <h1>Welcom to <% recipe.name > Recipe</h1>
+    <%- include('../partials/_navbar.ejs') %>
+    <h1>Welcome to <%= recipe.name %> Recipe</h1>
     <ul>
-        <% ingredients.forEach((ingredient) => { %>
+        <% recipe.ingredients.forEach((ingredient) => { %>
          <li>
             <a href="/ingredients/<% ingredient._id %>">
                 <%= ingredient.name %>
+                <form action="/ingredients/<%= ingredient._id %>?_method=DELETE" method="post">
+                    <button type="submit">Delete Ingredient</button>
+                </form>
             </a>
          </li>
         <% }) %>
     </ul>
-    <a href="/recipes/:recepieid/edit">Edit Recipe</a>
+    <a href="/recipes/<%= recipe._id %>/edit">Edit Recipe</a>
     
 </body>
 </html>

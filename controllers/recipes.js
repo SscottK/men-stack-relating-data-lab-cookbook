@@ -3,17 +3,18 @@ const router = express.Router()
 
 const User = require('../models/user.js')
 const Recipe = require('../models/recipe.js')
+const Ingredient = require('../models/ingredient.js')
 
 
 /********************************
 ***CREATE FUNCTIONALITY START ***
 ********************************/
-router.post('/recipes', async (req, res) => {
+router.post('/', async (req, res) => {
     try {
         const newRecipe = new Recipe(req.body);
         newRecipe.owner = req.session.user._id
         await newRecipe.save()
-        res.redirect('/recipes/:id')
+        res.redirect(`/recipes/${newRecipe._id}`)
     } catch (error) {
         console.log(error)
         res.redirect('/')
@@ -22,8 +23,8 @@ router.post('/recipes', async (req, res) => {
 
 
 
-router.get('/recipes/new', (req, res) => {
-    res.render('new.ejs')
+router.get('/new', (req, res) => {
+    res.render('recipes/new.ejs')
 })
 
 /********************************
@@ -33,10 +34,10 @@ router.get('/recipes/new', (req, res) => {
 ***READ FUNCTIONALITY START ***
 ********************************/
 ///INDEX//////
-router.get('/recipes', async (req, res) => {
+router.get('/', async (req, res) => {
     try {
         const foundRecipes = await Recipe.find({})
-        res.locals('index.ejs', {
+        res.render('recipes/index.ejs', {
             recipes: foundRecipes
         });
     } catch (error) {
@@ -47,10 +48,10 @@ router.get('/recipes', async (req, res) => {
 });
 
 /////SHOW//////
-router.get('recipes/recipeid', async (req, res) => {
+router.get('/:recipeid', async (req, res) => {
     try {
         const foundRecipe = await Recipe.findOne({_id: req.params.recipeid }).populate('ingredients')
-        res.locals('/recipes/show.ejs', {
+        res.render('recipes/show.ejs', {
             recipe: foundRecipe
         })
     } catch (error) {
@@ -65,9 +66,18 @@ router.get('recipes/recipeid', async (req, res) => {
 /********************************
 ***UPDATE FUNCTIONALITY START ***
 ********************************/
-router.put('/recipes/:recipeid', async (req, res) => {
+router.put('/:recipeid', async (req, res) => {
     try {
-        const updatedRecipe = await Recipe.findOne({ _id: req.params.recipeid }, req.body, { new: true})
+        let addedIngredient
+        if (req.body.newIngredient) {
+            addedIngredient = new Ingredient({ name: req.body.newIngredient})
+            await addedIngredient.save()
+        }
+        delete req.body.newIngredient
+        const updatedRecipe = await Recipe.findOneAndUpdate({ _id: req.params.recipeid }, {
+            name: req.body.name,
+            $push: {ingredients: addedIngredient._id}
+        }, { new: true})
         res.redirect(`/recipes/${updatedRecipe._id}`)
     } catch (error) {
         console.log(error)
@@ -76,10 +86,12 @@ router.put('/recipes/:recipeid', async (req, res) => {
 })
 
 
-router.get('/recipes/:recipeid/edit', async (req,res) => {
+router.get('/:recipeid/edit', async (req,res) => {
     try {
-        const foundRecipe = await Recipe.findOne({ _id: req.params.recipeid})
-        res.render('/recipes/edit.ejs')        
+        const foundRecipe = await Recipe.findOne({ _id: req.params.recipeid}).populate('ingredients')
+        res.render('recipes/edit.ejs', {
+            recipe: foundRecipe
+        })        
     } catch (error) {
         console.log(error)
         res.redirect('/')
@@ -95,11 +107,11 @@ router.get('/recipes/:recipeid/edit', async (req,res) => {
 /********************************
 ***DESTROY FUNCTIONALITY START **
 ********************************/
-router.delete('/recipes/:recipeid', async (req, res) => {
+router.delete('/:recipeid', async (req, res) => {
     try {
-        const deletedRecipe =  await Recipe.findOneAndDelete({ _id: req.params.recipeid})
-        deletedRecipe.ingredients.forEach((ingredient) => {
-            ingredient.deletOne()
+        await Recipe.findOneAndDelete({ _id: req.params.recipeid})
+        .then((recipe) => {
+            res.redirect('/recipes')
         })
     } catch (error) {
         console.log(error)
@@ -107,7 +119,16 @@ router.delete('/recipes/:recipeid', async (req, res) => {
     }
 })
 
-
+router.delete('/ingredients/:id', async (req, res) => {
+    try {
+        await Ingredient.findOneAndDelete({ _id: req.params.id})
+        .then((ingredient) => {
+            res.redirect('/recipes')
+        })
+    } catch (error) {
+        
+    }
+})
 
 /********************************
 ***DESTROY FUNCTIONALITY END ***

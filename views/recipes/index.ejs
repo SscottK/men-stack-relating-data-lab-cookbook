@@ -6,24 +6,25 @@
     <title>Recipes</title>
 </head>
 <body>
-    <%- include('./partials/_navbar.ejs') %>
+    <%- include('../partials/_navbar.ejs') %>
     <h1>Welcom to My Recipes</h1>
     <a href="/recipes/new">Add new Recipe</a>
     <% if (recipes) {%>
     <ul>
         <% recipes.forEach((recipe) => { %>
          <li>
-            <a href="/recipes/<% recipe._id %>">
+            <a href="/recipes/<%= recipe._id %>">
                 <%= recipe.name %>
             </a>
+            <form action="/recipes/<%= recipe._id %>?_method=DELETE" method="POST">
+                <button type="submit">Delete Recipe</button>
+            </form>
          </li>
         <% }) %>
     </ul>
     <%} else {%>
         <p>You have not created any recipes yet!</p>
     <% } %> 
-    <form action="/recipes/:recipeid?_method=DELETE" method="POST">
-        <button type="submit">Delete Recipe</button>
-    </form>
+
 </body>
 </html>
