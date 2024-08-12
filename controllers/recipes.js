@@ -107,6 +107,18 @@ router.get('/:recipeid/edit', async (req,res) => {
 /********************************
 ***DESTROY FUNCTIONALITY START **
 ********************************/
+router.delete('/:recipeid/ingredient/:id', async (req, res) => {
+    try {
+        
+        await Ingredient.findOneAndDelete({ _id: req.params.id})
+        .then((ingredient) => {
+            res.redirect('/recipes')
+        })
+    } catch (error) {
+        
+    }
+})
+
 router.delete('/:recipeid', async (req, res) => {
     try {
         await Recipe.findOneAndDelete({ _id: req.params.recipeid})
@@ -119,16 +131,7 @@ router.delete('/:recipeid', async (req, res) => {
     }
 })
 
-router.delete('/ingredients/:id', async (req, res) => {
-    try {
-        await Ingredient.findOneAndDelete({ _id: req.params.id})
-        .then((ingredient) => {
-            res.redirect('/recipes')
-        })
-    } catch (error) {
-        
-    }
-})
+
 
 /********************************
 ***DESTROY FUNCTIONALITY END ***
