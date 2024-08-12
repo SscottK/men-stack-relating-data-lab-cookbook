@@ -8,16 +8,17 @@
 <body>
     <%- include('../partials/_navbar.ejs') %>
     <h1>Welcome to <%= recipe.name %> Recipe</h1>
+    <p><%= recipe.instructions %></p>
     <ul>
         <% recipe.ingredients.forEach((ingredient) => { %>
          <li>            
             <%= ingredient.name %>
             <form action="/recipes/<%= recipe._id %>/ingredient/<%= ingredient._id %>?_method=DELETE" method="POST">
                 <button type="submit">Delete Ingredient</button>
-            </form>
+            </form>           
          </li>
         <% }) %>
-    </ul>
+    </ul>    
     <a href="/recipes/<%= recipe._id %>/edit">Edit Recipe</a>
     
 </body>

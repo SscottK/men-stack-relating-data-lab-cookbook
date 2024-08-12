@@ -78,7 +78,7 @@ router.put('/:recipeid', async (req, res) => {
             name: req.body.name,
             $push: {ingredients: addedIngredient._id}
         }, { new: true})
-        res.redirect(`/recipes/${updatedRecipe._id}`)
+        res.redirect(`/recipes/${updatedRecipe._id}/edit`)
     } catch (error) {
         console.log(error)
         res.redirect('/')
@@ -109,13 +109,14 @@ router.get('/:recipeid/edit', async (req,res) => {
 ********************************/
 router.delete('/:recipeid/ingredient/:id', async (req, res) => {
     try {
-        
+        const recipe = await Recipe.findById(req.params.recipeid)
         await Ingredient.findOneAndDelete({ _id: req.params.id})
         .then((ingredient) => {
-            res.redirect('/recipes')
+            res.redirect(`/recipes/${recipe._id}`)
         })
     } catch (error) {
-        
+        console.log(error)
+        res.redirect('/')
     }
 })
 
